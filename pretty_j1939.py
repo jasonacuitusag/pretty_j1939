@@ -51,19 +51,34 @@ parser.add_argument('--format',    dest='format', action='store_true',  help='fo
 parser.add_argument('--no-format', dest='format', action='store_false', help='(default)')
 parser.set_defaults(format=False)
 
+parser.add_argument('--input-separator', type=str, const=True, default=None, nargs='?',
+                    help='separator to use when splitting a line.')
+
+parser.add_argument('--pgn-column', type=int, const=True, default=1, nargs='?',
+                    help='zero based index of the column containg the pgn code')
+
+parser.add_argument('--pgn-data-column', type=int, const=True, default=-1, nargs='?',
+                    help='zero based index of the column containg the pgn data')
+
+parser.add_argument('--timestamp-column', type=int, const=True, default=None, nargs='?',
+                    help='zero based index of the column containg a integer timestamp')
+
 
 args = parser.parse_args()
 
+if args.pgn_data_column < 0:
+    args.pgn_data_column = args.pgn_column + 1
 
-def process_lines(candump_file):
+
+def process_lines(candump_file, line_parser):
     for candump_line in candump_file.readlines():
         if candump_line == '\n':
             continue
 
         try:
-            message = candump_line.split()[2]
-            message_id = bitstring.ConstBitArray(hex=message.split('#')[0])
-            message_data = bitstring.ConstBitArray(hex=message.split('#')[1])
+            message = line_parser(candump_line)
+            message_id = bitstring.ConstBitArray(hex=message[0])
+            message_data = bitstring.ConstBitArray(hex=message[1])
         except (IndexError, ValueError):
             print("Warning: error in line '%s'" % candump_line, file=sys.stderr)
             continue
@@ -71,6 +86,10 @@ def process_lines(candump_file):
         desc_line = ''
 
         description = describe(message_data.bytes, message_id.uint)
+
+        if args.timestamp_column is not None:
+            description["Timestamp"] = message[2]
+            description.move_to_end("Timestamp", last=False)
         if args.format:
             json_description = str(json.dumps(description, indent=4))
         else:
@@ -112,4 +131,14 @@ if __name__ == '__main__':
         f = sys.stdin
     else:
         f = open(args.candump, 'r')
-    process_lines(f)
+
+    if args.input_separator is None:
+        line_parser = lambda candump_line: candump_line.split()[2].split('#')
+    else:
+        field_selector = lambda all_fields: [
+            all_fields[args.pgn_column],
+            all_fields[args.pgn_data_column],
+            all_fields[args.timestamp_column if args.timestamp_column is not None else 0]]
+        line_parser = lambda candump_line: field_selector(candump_line.split(args.input_separator))
+
+    process_lines(f, line_parser)

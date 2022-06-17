@@ -11,7 +11,7 @@
       "program": "${workspaceFolder}/pretty_j1939.py",
       "console": "integratedTerminal",
       "justMyCode": true,
-      "args": ["--format", "--no-link", "--da-json", "${workspaceFolder}/J1939DA_MAY2022.json", "--candata", "${workspaceFolder}/temp_can_data.txt"]
+      "args": ["--input-separator", ",", "--timestamp-column", "0", "--format", "--link", "--include-na", "--transport", "--da-json", "${workspaceFolder}/J1939DA_MAY2022.json", "${workspaceFolder}/tmp/48476bf1-f33d-4060-9d7f-a31e92e1d38a"]
     },{
       "name": "CAN Create PGN File",
       "type": "python",

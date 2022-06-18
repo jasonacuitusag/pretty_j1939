@@ -26,13 +26,15 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
-arg_defaults.py
 
 # IDEs
 .idea/
 
 # Excel spreadsheets
 *.xls
+
+# Excel spreadsheets derivatives
+J1939DA_MAY2022.json
 
 # ignore any testing resources in tmp/ so no one accidentally commits DAs or logs
 tmp/

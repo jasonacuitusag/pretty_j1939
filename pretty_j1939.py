@@ -63,14 +63,38 @@ parser.add_argument('--pgn-data-column', type=int, const=True, default=-1, nargs
 parser.add_argument('--timestamp-column', type=int, const=True, default=None, nargs='?',
                     help='zero based index of the column containg a integer timestamp')
 
+parser.add_argument('--json-array',    dest='json_array', action='store_true', help='output a json array')
+parser.add_argument('--no-json-array', dest='json_array', action='store_false')
+parser.set_defaults(json_array=False)
 
 args = parser.parse_args()
 
 if args.pgn_data_column < 0:
     args.pgn_data_column = args.pgn_column + 1
 
+if args.input_separator is None:
+    line_parser = lambda candump_line: candump_line.split()[2].split('#')
+else:
+    field_selector = lambda all_fields: [
+        all_fields[args.pgn_column],
+        all_fields[args.pgn_data_column],
+        all_fields[args.timestamp_column if args.timestamp_column is not None else 0]]
+    line_parser = lambda candump_line: field_selector(candump_line.split(args.input_separator))
 
-def process_lines(candump_file, line_parser):
+if args.json_array:
+    print_header = lambda: print('[')
+    print_line = lambda desc_line, is_first_line: print(desc_line, end = '') if is_first_line else print(',\n', desc_line, end = '', sep='')
+    print_footer = lambda: print('\n]')
+else:
+    print_header = lambda: None
+    print_line = lambda desc_line, _: print(desc_line)
+    print_footer = lambda: None
+
+
+def process_lines(candump_file):
+    is_first_line = True
+    print_header()
+
     for candump_line in candump_file.readlines():
         if candump_line == '\n':
             continue
@@ -114,7 +138,10 @@ def process_lines(candump_file, line_parser):
                     desc_line = desc_line + '\n' + ' ' * len(candump_line) + "; " + line
 
         if len(desc_line) > 0:
-            print(desc_line)
+           print_line(desc_line, is_first_line)
+           is_first_line = False
+
+    print_footer()
 
 
 if __name__ == '__main__':
@@ -132,13 +159,4 @@ if __name__ == '__main__':
     else:
         f = open(args.candump, 'r')
 
-    if args.input_separator is None:
-        line_parser = lambda candump_line: candump_line.split()[2].split('#')
-    else:
-        field_selector = lambda all_fields: [
-            all_fields[args.pgn_column],
-            all_fields[args.pgn_data_column],
-            all_fields[args.timestamp_column if args.timestamp_column is not None else 0]]
-        line_parser = lambda candump_line: field_selector(candump_line.split(args.input_separator))
-
-    process_lines(f, line_parser)
+    process_lines(f)

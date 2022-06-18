@@ -378,7 +378,7 @@ class TransportTracker:
                     try:
                         self.new_data[(da, sa)][7 * (packet_number - 1) + i] = b
                     except Exception as e:
-                        print(e)
+                        print(e, file=sys.stderr)
                 is_last_packet = packet_number == self.new_count[(da, sa)]
 
                 if self.is_real_time:

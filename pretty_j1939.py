@@ -4,68 +4,91 @@ import bitstring
 import argparse
 import sys
 import json
+import importlib
 
 import pretty_j1939.describe
+
+defaults = importlib.import_module('arg_defaults').defaults if importlib.util.find_spec("arg_defaults") else {}
+
+def put_if_absent(key, value):
+    if key not in defaults:
+        defaults[key] = value
+
+put_if_absent('da-json',    pretty_j1939.describe.DEFAULT_DA_JSON)
+put_if_absent('candata',    pretty_j1939.describe.DEFAULT_CANDATA)
+put_if_absent('pgn',        pretty_j1939.describe.DEFAULT_PGN)
+put_if_absent('spn',        pretty_j1939.describe.DEFAULT_SPN)
+put_if_absent('transport',  pretty_j1939.describe.DEFAULT_TRANSPORT)
+put_if_absent('link',       pretty_j1939.describe.DEFAULT_LINK)
+put_if_absent('include_na', pretty_j1939.describe.DEFAULT_INCLUDE_NA)
+put_if_absent('real-time',  pretty_j1939.describe.DEFAULT_REAL_TIME)
+
+put_if_absent('format',           False)
+put_if_absent('input-separator',  None)
+put_if_absent('pgn-column',       1)
+put_if_absent('pgn-data-column', -1)
+put_if_absent('timestamp-column', None)
+put_if_absent('json-array',       False)
 
 
 parser = argparse.ArgumentParser(description='pretty-printing J1939 candump logs')
 parser.add_argument('candump', help='candump log, use - for stdin')
 
-parser.add_argument('--da-json', type=str, const=True, default=pretty_j1939.describe.DEFAULT_DA_JSON, nargs='?',
+parser.add_argument('--da-json', type=str, const=True, default=defaults['da-json'], nargs='?',
                     help='absolute path to the input JSON DA (default=\"./J1939db.json\")')
 
 parser.add_argument('--candata',    dest='candata', action='store_true',  help='print input can data')
 parser.add_argument('--no-candata', dest='candata', action='store_false', help='(default)')
-parser.set_defaults(candata=pretty_j1939.describe.DEFAULT_CANDATA)
+parser.set_defaults(candata=defaults['candata'])
 
 parser.add_argument('--pgn',    dest='pgn', action='store_true', help='(default) print source/destination/type '
                                                                       'description')
 parser.add_argument('--no-pgn', dest='pgn', action='store_false')
-parser.set_defaults(pgn=pretty_j1939.describe.DEFAULT_PGN)
+parser.set_defaults(pgn=defaults['pgn'])
 
 parser.add_argument('--spn',    dest='spn', action='store_true', help='(default) print signals description')
 parser.add_argument('--no-spn', dest='spn', action='store_false')
-parser.set_defaults(spn=pretty_j1939.describe.DEFAULT_SPN)
+parser.set_defaults(spn=defaults['spn'])
 
 parser.add_argument('--transport',    dest='transport', action='store_true',  help='print details of transport-layer '
                                                                                    'streams found (default)')
 parser.add_argument('--no-transport', dest='transport', action='store_false', help='')
-parser.set_defaults(transport=pretty_j1939.describe.DEFAULT_TRANSPORT)
+parser.set_defaults(transport=defaults['transport'])
 
 parser.add_argument('--link',    dest='link', action='store_true',  help='print details of link-layer frames found')
 parser.add_argument('--no-link', dest='link', action='store_false', help='(default)')
-parser.set_defaults(link=pretty_j1939.describe.DEFAULT_LINK)
+parser.set_defaults(link=defaults['link'])
 
 parser.add_argument('--include-na',    dest='include_na', action='store_true',  help='include not-available (0xff) SPN '
                                                                                      'values')
 parser.add_argument('--no-include-na', dest='include_na', action='store_false', help='(default)')
-parser.set_defaults(include_na=pretty_j1939.describe.DEFAULT_INCLUDE_NA)
+parser.set_defaults(include_na=defaults['include_na'])
 
 parser.add_argument('--real-time',    dest='real_time', action='store_true',  help='emit SPNs as they are seen in '
                                                                                    'transport sessions')
 parser.add_argument('--no-real-time', dest='real_time', action='store_false', help='(default)')
-parser.set_defaults(real_time=pretty_j1939.describe.DEFAULT_REAL_TIME)
+parser.set_defaults(real_time=defaults['real-time'])
 
 parser.add_argument('--format',    dest='format', action='store_true',  help='format each structure (otherwise '
                                                                              'single-line)')
 parser.add_argument('--no-format', dest='format', action='store_false', help='(default)')
-parser.set_defaults(format=False)
+parser.set_defaults(format=defaults['format'])
 
-parser.add_argument('--input-separator', type=str, const=True, default=None, nargs='?',
+parser.add_argument('--input-separator', type=str, const=True, default=defaults['input-separator'], nargs='?',
                     help='separator to use when splitting a line.')
 
-parser.add_argument('--pgn-column', type=int, const=True, default=1, nargs='?',
+parser.add_argument('--pgn-column', type=int, const=True, default=defaults['pgn-column'], nargs='?',
                     help='zero based index of the column containg the pgn code')
 
-parser.add_argument('--pgn-data-column', type=int, const=True, default=-1, nargs='?',
+parser.add_argument('--pgn-data-column', type=int, const=True, default=defaults['pgn-data-column'], nargs='?',
                     help='zero based index of the column containg the pgn data')
 
-parser.add_argument('--timestamp-column', type=int, const=True, default=None, nargs='?',
+parser.add_argument('--timestamp-column', type=int, const=True, default=defaults['timestamp-column'], nargs='?',
                     help='zero based index of the column containg a integer timestamp')
 
 parser.add_argument('--json-array',    dest='json_array', action='store_true', help='output a json array')
 parser.add_argument('--no-json-array', dest='json_array', action='store_false')
-parser.set_defaults(json_array=False)
+parser.set_defaults(json_array=defaults['json-array'])
 
 args = parser.parse_args()
 

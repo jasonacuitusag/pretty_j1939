@@ -96,13 +96,13 @@ if args.pgn_data_column < 0:
     args.pgn_data_column = args.pgn_column + 1
 
 if args.input_separator is None:
-    line_parser = lambda candump_line: candump_line.split()[2].split('#')
+    line_parser = lambda candump_line: candump_line.strip().split()[2].split('#')
 else:
     field_selector = lambda all_fields: [
         all_fields[args.pgn_column],
         all_fields[args.pgn_data_column],
         all_fields[args.timestamp_column if args.timestamp_column is not None else 0]]
-    line_parser = lambda candump_line: field_selector(candump_line.split(args.input_separator))
+    line_parser = lambda candump_line: field_selector(candump_line.strip().split(args.input_separator))
 
 if args.json_array:
     print_header = lambda: print('[')
@@ -133,6 +133,8 @@ def process_lines(candump_file):
         desc_line = ''
 
         description = describe(message_data.bytes, message_id.uint)
+
+        description["Hex Data"] = message[1]
 
         if args.timestamp_column is not None:
             description["Timestamp"] = message[2]

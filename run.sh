@@ -1,4 +1,4 @@
-FILENAME=test_data
+FILENAME=$1
 
 INPUT_FILENAME="tmp/$FILENAME"
 OUTPUT_FILENAME="tmp/output-$FILENAME.json"

@@ -5,10 +5,11 @@ import argparse
 import sys
 import json
 import importlib
+from importlib import util
 
 import pretty_j1939.describe
 
-defaults = importlib.import_module('arg_defaults').defaults if importlib.util.find_spec("arg_defaults") else {}
+defaults = importlib.import_module('arg_defaults').defaults if util.find_spec("arg_defaults") else {}
 
 def put_if_absent(key, value):
     if key not in defaults:

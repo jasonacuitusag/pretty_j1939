@@ -233,8 +233,8 @@ class DADescriber:
             def mark_spn_covered(new_spn, new_spn_name, new_spn_description):
                 skip_spns[new_spn] = (new_spn_name, new_spn_description)  # TODO: move this closer to real-time handling
 
-            def add_spn_description(new_spn, new_spn_name, new_spn_description):
-                description[new_spn_name] = new_spn_description
+            def add_spn_description(new_spn, new_spn_name, new_spn_value, new_spn_description):
+                description[new_spn_name] = {"value": new_spn_value, "description": new_spn_description}
                 mark_spn_covered(new_spn, new_spn_name, new_spn_description)
 
             try:
@@ -244,36 +244,37 @@ class DADescriber:
                         continue
                     elif math.isnan(spn_value):
                         if self.include_na:
-                            add_spn_description(spn, spn_name, "N/A")
+                            add_spn_description(spn, spn_name, spn_value, "N/A")
                         else:
                             mark_spn_covered(spn, spn_name, "N/A")
                     elif is_spn_bitencoded(spn_units):
                         try:
                             enum_descriptions = self.bit_encodings.get(spn)
                             if enum_descriptions is None:
-                                add_spn_description(spn, spn_name, "%d (Unknown)" % spn_value)
+                                add_spn_description(spn, spn_name, spn_value, "%d (Unknown)" % spn_value)
                                 continue
                             spn_value_description = enum_descriptions[str(int(spn_value))].strip()
-                            add_spn_description(spn, spn_name, "%d (%s)" % (spn_value, spn_value_description))
+                            add_spn_description(spn, spn_name, spn_value, "%d (%s)" % (spn_value, spn_value_description))
                         except KeyError:
-                            add_spn_description(spn, spn_name, "%d (Unknown)" % spn_value)
+                            add_spn_description(spn, spn_name, spn_value, "%d (Unknown)" % spn_value)
                     else:
-                        add_spn_description(spn, spn_name, "%s [%s]" % (spn_value, spn_units))
+                        add_spn_description(spn, spn_name, spn_value, "%s [%s]" % (spn_value, spn_units))
                 else:
                     spn_bytes = self.get_spn_bytes(message_data_bitstring, spn, pgn, is_complete_message)
                     if spn_bytes.length == 0 and not is_complete_message:  # incomplete message
                         continue
                     else:
                         if spn_units.lower() in ("request dependent",):
-                            add_spn_description(spn, spn_name, "%s (%s)" % (spn_bytes, spn_units))
+                            add_spn_description(spn, spn_name, "%s" % (spn_bytes), "%s (%s)" % (spn_bytes, spn_units))
                         elif spn_units.lower() in ("ascii",):
-                            add_spn_description(spn, spn_name, "%s" % spn_bytes.bytes.decode(encoding="utf-8"))
+                            add_spn_description(spn, spn_name, "%s" % (spn_bytes), "%s" % spn_bytes.bytes.decode(encoding="utf-8"))
                         else:
-                            add_spn_description(spn, spn_name, "%s" % spn_bytes)
+                            add_spn_description(spn, spn_name, "%s" % (spn_bytes), "%s" % spn_bytes)
 
             except ValueError:
-                add_spn_description(spn, spn_name, "%s (%s)" % (
-                    self.get_spn_bytes(message_data_bitstring, spn, pgn, is_complete_message), "Out of range"))
+                spn_bytes = self.get_spn_bytes(message_data_bitstring, spn, pgn, is_complete_message)
+
+                add_spn_description(spn, spn_name, "%s" % (spn_bytes), "%s (%s)" % (spn_bytes, "Out of range"))
 
         return description
 

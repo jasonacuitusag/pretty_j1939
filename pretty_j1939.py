@@ -135,6 +135,7 @@ def process_lines(candump_file):
 
         description = describe(message_data.bytes, message_id.uint)
 
+        description["CAN ID"] = message[0]
         description["Hex Data"] = message[1]
 
         if args.timestamp_column is not None:

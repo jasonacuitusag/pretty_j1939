@@ -5,21 +5,30 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "CAN File Parse",
+      "name": "Pretty J1939 File Parse",
       "type": "python",
       "request": "launch",
       "program": "${workspaceFolder}/pretty_j1939.py",
       "console": "integratedTerminal",
       "justMyCode": true,
-      "args": ["--input-separator", ",", "--timestamp-column", "0", "--format", "--link", "--include-na", "--transport", "--da-json", "${workspaceFolder}/J1939DA_MAY2022.json", "${workspaceFolder}/tmp/48476bf1-f33d-4060-9d7f-a31e92e1d38a"]
+      "args": ["--input-separator", ",", "--timestamp-column", "0", "--format", "--link", "--include-na", "--transport", "--da-json", "${workspaceFolder}/J1939DA_MAY2022.json", "${workspaceFolder}/tmp/d7642096-7efb-4715-8904-5bd19cc95d70"]
     },{
-      "name": "CAN Create PGN File",
+      "name": "Pretty J1939 Create PGN File",
       "type": "python",
       "request": "launch",
       "program": "${workspaceFolder}/create_j1939db-json.py",
       "console": "integratedTerminal",
       "justMyCode": true,
       "args": ["-f", "J1939DA_MAY2022.xls", "-w", " J1939DA_MAY2022.json"]
+    },
+    {
+      "name": "Pretty J1939 Lockwood file parse",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/pretty_j1939.py",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "args": ["${workspaceFolder}/../CanReader/tempdata.txt"]
     }
   ]
 }

@@ -5,6 +5,7 @@ WORKDIR /usr/src/app
 RUN apk add --no-cache \
     python3 \
     py3-pip \
+    jq \
     && echo "Packages Installed."
 
 RUN rm -rf /usr/lib/python3*/EXTERNALLY-MANAGED \
@@ -18,4 +19,6 @@ COPY pretty_j1939.py .
 COPY arg_defaults.py .
 COPY pretty_j1939/* ./pretty_j1939/
 COPY J1939DA_MAY2022.json .
-COPY temp_2024-09-09.txt .
+COPY tmp/temp_2024-09-09.txt .
+COPY tmp/can_2024-09-09.txt .
+COPY manufacturer.sh .

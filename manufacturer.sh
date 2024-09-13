@@ -1,0 +1,2 @@
+./run.sh $1 | jq -r 'map(."Manufacturer Defined Usage (PropB_PDU2)") | map(select(.value != null)) | map(.value) | .[]' | sort | uniq
+./run.sh $1 | jq -r 'map(."Manufacturer Defined Usage (PropB_PDU2)") | map(select(.description != null)) | map(.description) | .[]' | sort | uniq
